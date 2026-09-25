@@ -7,7 +7,7 @@ Public article source and analysis code for our independent follow-up to [Sedrak
 - [Nederlandse reeks](https://edukaizen.nl/nighthawk-61-qubit-random-circuit-sampling/)
 - [English series](https://edukaizen.nl/nighthawk-61-qubit-random-circuit-sampling-en/)
 
-Both series have an overview and three parts: the paper's method, our 61-qubit IBM run, and the classical MPS comparison.
+Both series have an overview and four parts: the paper's method, our 61-qubit IBM run, the classical MPS comparison, and RCS theory and applications.
 
 ## Scope of the follow-up
 

@@ -2,7 +2,7 @@
 /** Publish the guarded RCS 61q bilingual series via `wp eval-file`. */
 
 $manifest = json_decode(file_get_contents(__DIR__ . '/manifest.json'), true);
-if (!is_array($manifest) || ($manifest['series'] ?? '') !== 'rcs61-20260925' || count($manifest['pages'] ?? []) !== 8) {
+if (!is_array($manifest) || ($manifest['series'] ?? '') !== 'rcs61-20260925' || count($manifest['pages'] ?? []) !== 10) {
     throw new RuntimeException('Unexpected RCS 61q manifest');
 }
 
@@ -74,12 +74,12 @@ if (is_wp_error($menu_root)) {
     throw new RuntimeException('Could not create the RCS menu root: ' . $menu_root->get_error_message());
 }
 $menu_items = [['key' => 'en-hub', 'id' => (int) $menu_root]];
-for ($part = 1; $part <= 3; $part++) {
+for ($part = 1; $part <= 4; $part++) {
     $key = "en-$part";
     $url = get_permalink($page_ids[$key]);
     $existing = $find_item($url);
     $id = wp_update_nav_menu_item($menu_id, $existing ? $existing->ID : 0, [
-        'menu-item-title' => "Part $part: " . [1 => 'The paper', 2 => 'Our IBM measurements', 3 => 'MPS and advantage'][$part],
+        'menu-item-title' => "Part $part: " . [1 => 'The paper', 2 => 'Our IBM measurements', 3 => 'MPS and advantage', 4 => 'RCS theory and applications'][$part],
         'menu-item-url' => $url,
         'menu-item-status' => 'publish',
         'menu-item-type' => 'custom',

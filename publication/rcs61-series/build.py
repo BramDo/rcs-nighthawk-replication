@@ -24,7 +24,7 @@ PAGES = [
 <p>In de <a href="https://arxiv.org/abs/2609.28657">preprint van Sedrakyan en collega’s</a> wordt een random circuit met 61 qubits, 36 cycli en 918 CZ-poorten op <code>ibm_phoenix</code> bemonsterd. De onderzoekers rapporteerden één miljoen bitstrings in 19 seconden QPU-tijd. Zij schatten de kwaliteit van het diepe circuit op ongeveer 0,0023 met afzonderlijke spiegel- en patchproeven.</p>
 <p>Wij draaiden hetzelfde vrijgegeven logische circuit op dezelfde backend en fysieke layout: opnieuw één miljoen bitstrings en opnieuw 19 seconden gerapporteerde QPU-tijd. Onze 61-qubit bitstrings zijn niet rechtstreeks met ideale amplitudes gescoord. De tijd is dus herhaald; de fideliteit uit de paper is niet onafhankelijk herhaald.</p>
 <h2>Lees de reeks</h2>
-<ol><li><a href="/nighthawk-61-qubit-random-circuit-sampling/1-paper-en-methode/">Deel 1 — De paper en haar methode</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling/2-onze-61-qubit-metingen/">Deel 2 — Onze 61-qubit metingen</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling/3-mps-en-quantumvoordeel/">Deel 3 — MPS en de grens van de vergelijking</a></li></ol>
+<ol><li><a href="/nighthawk-61-qubit-random-circuit-sampling/1-paper-en-methode/">Deel 1 — De paper en haar methode</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling/2-onze-61-qubit-metingen/">Deel 2 — Onze 61-qubit metingen</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling/3-mps-en-quantumvoordeel/">Deel 3 — MPS en de grens van de vergelijking</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling/4-rcs-theorie-en-toepassingen/">Deel 4 — RCS-theorie en toepassingen</a></li></ol>
 <h2>De kern in drie getallen</h2>
 <figure class="wp-block-table"><table><thead><tr><th>Route</th><th>Samples</th><th>Gerapporteerde tijd</th></tr></thead><tbody><tr><td>Paper: quantum</td><td>1.000.000</td><td>19 s QPU</td></tr><tr><td>Onze IBM-run: quantum</td><td>1.000.000</td><td>19 s QPU</td></tr><tr><td>Onze MPS, χ=128</td><td>1.000</td><td>1.249 s lokale rekentijd</td></tr></tbody></table></figure>
 <p>De laatste twee tijden tonen een grote voorsprong op <em>deze geteste MPS-implementatie</em>. Het zijn verschillende klokken en de MPS-uitkomsten komen op eenvoudige bitstatistieken nog niet overeen met de IBM-data. Daarom maken we geen nieuwe claim dat onze run de beste klassieke methode bij gelijke kwaliteit heeft verslagen.</p>
@@ -41,7 +41,7 @@ PAGES = [
 <p>In the <a href="https://arxiv.org/abs/2609.28657">preprint by Sedrakyan and colleagues</a>, a random circuit on 61 qubits with 36 cycles and 918 CZ gates was sampled on <code>ibm_phoenix</code>. The researchers reported one million bitstrings in 19 seconds of QPU time. They estimated deep-circuit fidelity near 0.0023 using separate mirror and patch experiments.</p>
 <p>We ran the same released logical circuit on the same backend and physical layout: another million bitstrings and another 19 seconds of reported QPU time. Our full-width bitstrings were not directly scored against ideal amplitudes. We repeated the timing, not the paper’s fidelity estimate.</p>
 <h2>Read the series</h2>
-<ol><li><a href="/nighthawk-61-qubit-random-circuit-sampling-en/1-paper-and-method/">Part 1 — The paper and its method</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling-en/2-our-61-qubit-measurements/">Part 2 — Our 61-qubit measurements</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling-en/3-mps-and-quantum-advantage/">Part 3 — MPS and the limits of the comparison</a></li></ol>
+<ol><li><a href="/nighthawk-61-qubit-random-circuit-sampling-en/1-paper-and-method/">Part 1 — The paper and its method</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling-en/2-our-61-qubit-measurements/">Part 2 — Our 61-qubit measurements</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling-en/3-mps-and-quantum-advantage/">Part 3 — MPS and the limits of the comparison</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling-en/4-rcs-theory-and-applications/">Part 4 — RCS theory and applications</a></li></ol>
 <h2>Three numbers to start with</h2>
 <figure class="wp-block-table"><table><thead><tr><th>Route</th><th>Samples</th><th>Reported time</th></tr></thead><tbody><tr><td>Paper: quantum</td><td>1,000,000</td><td>19 s QPU</td></tr><tr><td>Our IBM run: quantum</td><td>1,000,000</td><td>19 s QPU</td></tr><tr><td>Our MPS, χ=128</td><td>1,000</td><td>1,249 s local runtime</td></tr></tbody></table></figure>
 <p>The latter two timings show a large lead over <em>this tested MPS implementation</em>. They use different clocks, and the MPS output still differs from IBM on simple bit statistics. We therefore make no new claim that our run beats the best classical method at matched output quality.</p>
@@ -149,6 +149,58 @@ PAGES = [
 <p>Sources: <a href="https://arxiv.org/abs/2609.28657">the paper</a>, <a href="https://github.com/BramDo/rcs-nighthawk">code and original data</a>.</p>
 """,
     },
+    {
+        "key": "nl-4", "lang": "nl", "part": 4,
+        "title": "Deel 4: RCS-theorie en toepassingen",
+        "slug": "4-rcs-theorie-en-toepassingen", "parent_key": "nl-hub",
+        "lead": "Random-circuit sampling is een zorgvuldig gekozen benchmark. Wat wordt er wiskundig gesampled, hoe meet je kwaliteit, en wat kun je met de uitkomst doen?",
+        "body": """
+<h2>Van circuit naar kansverdeling</h2>
+<p>We beginnen met 61 qubits in de toestand |0…0⟩. Een vast gekozen circuit U mengt de qubits met willekeurig gekozen één-qubitpoorten en CZ-poorten tussen buren. Aan het eind meten we alle qubits. Voor een bitstring x voorspelt de ideale quantumtheorie de kans <strong>p<sub>U</sub>(x) = |⟨x|U|0…0⟩|<sup>2</sup></strong>. Het circuit blijft tijdens alle shots hetzelfde; de individuele meetuitkomsten zijn willekeurig volgens deze ene verdeling.</p>
+<p>Bij 61 qubits bestaan er 2<sup>61</sup>, ongeveer 2,3 × 10<sup>18</sup>, mogelijke bitstrings. Een miljoen shots verkent daar maar een minuscuul deel van. Het feit dat alle bitstrings verschillen is daarom ook voor een uniforme klassieke generator te verwachten. Het probleem is niet om zomaar nullen en enen te maken, maar om bitstrings volgens <em>de circuitafhankelijke kansen</em> te produceren.</p>
+<h2>Waarom die kansen lastig worden</h2>
+<p>Een enkele één-qubitpoort verandert lokale amplitudes. CZ-poorten koppelen naburige qubits, waardoor interferentie en verstrengeling zich met de circuitdiepte verspreiden. De gekozen willekeurige poorten maken de uitvoer doorgaans moeilijk te beschrijven met een eenvoudig patroon van onafhankelijke bits. In het voldoende chaotische regime benaderen de geschaalde ideale kansen z = 2<sup>n</sup>p<sub>U</sub>(x) een brede Porter–Thomas-verdeling: de meeste uitkomsten zijn zeldzaam, maar sommige hebben een veel grotere kans. <em>Dat is een eigenschap van de ideale kansverdeling, niet iets dat uit alleen het aantal enen in een sample blijkt.</em></p>
+<h2>Hoe toets je of de processor het juiste circuit volgde?</h2>
+<p>Als alle ideale kansen berekenbaar zijn, kun je linear XEB gebruiken: <strong>F<sub>XEB</sub> = 2<sup>n</sup>(1/M) Σ<sub>i</sub> p<sub>U</sub>(x<sub>i</sub>) − 1</strong>. Bij uniforme samples is de verwachte waarde nul; voor een ideaal, voldoende anticoncentrerend circuit ligt zij rond één. De Nighthawk-paper normaliseert de patchscores bovendien met de ideale XEB van <em>hetzelfde</em> patchcircuit. Zo wordt een nog niet volledig chaotische patch niet automatisch verkeerd ingeschat.</p>
+<p>Voor het volle 61-qubit circuit zijn de benodigde ideale kansen te duur om de miljoen uitkomsten direct te scoren. De paper gebruikt daarom kleinere patches en omkeerbare spiegelcircuits als twee verschillende kwaliteitsproeven. XEB blijft een score/proxy: een hoge score op zichzelf bewijst geen kleine totale-variatieafstand tot de ideale verdeling. Onze herhaalde hardwarejob bevatte die extra patch- en spiegelserie niet, zodat zijn globale fideliteit open blijft.</p>
+<h2>Waarvoor is RCS bruikbaar?</h2>
+<figure class="wp-block-table"><table><thead><tr><th>Gebruik</th><th>Wat RCS levert</th><th>Grenzen</th></tr></thead><tbody>
+<tr><td>Processorbenchmark</td><td>Test hoeveel qubits, CZ-lagen en circuitdiepte tegelijk met meetbaar signaal uitvoerbaar zijn.</td><td>Een benchmarkscore is geen applicatie-uitkomst.</td></tr>
+<tr><td>Hardware en compiler verbeteren</td><td>Vergelijk fysieke layouts, kalibratievensters, transpilers en foutmitigatie op vastgelegde circuits.</td><td>Vergelijk met dezelfde circuits, shots en kwaliteitsmaat.</td></tr>
+<tr><td>Klassieke methoden testen</td><td>Een openbare circuitfamilie laat tensorcontractie, MPS en andere samplers tegen een concrete taak concurreren.</td><td>Tijd telt pas eerlijk mee bij dezelfde vereiste outputkwaliteit.</td></tr>
+<tr><td>Quantumdynamica onderzoeken</td><td>Willekeurige circuits zijn een gecontroleerde proef voor informatieverspreiding, verstrengeling en ruis.</td><td>Het Nighthawk-circuit modelleert niet automatisch een materiaal of chemische reactie.</td></tr>
+</tbody></table></figure>
+<h2>Wat is het nog niet?</h2>
+<p>Een RCS-bitstring is doorgaans geen antwoord op een optimalisatievraag, geen molecuulenergie en geen bewijs dat een quantumcomputer nuttige machine-learningtaken sneller uitvoert. De directe toepassing is <strong>meten hoe goed een quantumprocessor moeilijke, controleerbare circuits uitvoert</strong>. De grotere belofte is dat zulke metingen de ontwikkeling van betere hardware en verificatiemethoden sturen; voor een praktisch algoritme moet vervolgens ook dat algoritme op zijn eigen taak worden getest.</p>
+<p>Meer lezen: <a href="https://arxiv.org/abs/2609.28657">Sedrakyan et al. over Nighthawk</a> en <a href="https://research.google/pubs/characterizing-quantum-supremacy-in-near-term-devices/">Boixo et al. over RCS en XEB</a>.</p>
+""",
+    },
+    {
+        "key": "en-4", "lang": "en", "part": 4,
+        "title": "Part 4: RCS theory and applications",
+        "slug": "4-rcs-theory-and-applications", "parent_key": "en-hub",
+        "lead": "Random-circuit sampling is a carefully chosen benchmark. What is sampled mathematically, how is quality assessed, and what can the result be used for?",
+        "body": """
+<h2>From a circuit to a probability distribution</h2>
+<p>Start with 61 qubits in |0…0⟩. A fixed circuit U mixes them with randomly selected single-qubit gates and CZ gates between neighbors. We measure all qubits at the end. For a bitstring x, ideal quantum theory predicts <strong>p<sub>U</sub>(x) = |⟨x|U|0…0⟩|<sup>2</sup></strong>. The circuit stays fixed across shots; individual outcomes are random draws from that one distribution.</p>
+<p>There are 2<sup>61</sup>, about 2.3 × 10<sup>18</sup>, possible 61-bit strings. A million shots touch only a tiny fraction. A uniform classical generator would also yield almost entirely distinct strings. The task is not to produce arbitrary zeros and ones; it is to sample according to the <em>circuit-dependent probabilities</em>.</p>
+<h2>Why do those probabilities become difficult?</h2>
+<p>A single-qubit gate changes local amplitudes. CZ gates couple neighboring qubits, spreading interference and entanglement as depth grows. Randomly chosen gates usually prevent the output from being described as a simple pattern of independent bits. In a sufficiently chaotic regime, the rescaled ideal probabilities z = 2<sup>n</sup>p<sub>U</sub>(x) approach a broad Porter–Thomas distribution: most outcomes are unlikely while a few are much more likely. <em>That describes the ideal distribution, not something one can read from the number of ones in a measured string.</em></p>
+<h2>How do we test whether the processor followed the circuit?</h2>
+<p>When ideal probabilities can be calculated, linear XEB is useful: <strong>F<sub>XEB</sub> = 2<sup>n</sup>(1/M) Σ<sub>i</sub> p<sub>U</sub>(x<sub>i</sub>) − 1</strong>. Uniform samples have expected score zero; an ideal, sufficiently anticoncentrating circuit scores near one. The Nighthawk paper further divides each patch score by the ideal XEB of <em>that same patch circuit</em>. This avoids misreading a patch that has not yet fully anticoncentrated.</p>
+<p>For the full 61-qubit circuit, the required ideal probabilities are too costly to score all million outcomes directly. The paper therefore uses smaller patches and reversible mirror circuits as two distinct quality checks. XEB remains a score or proxy: a high score alone does not certify small total-variation distance from the ideal distribution. Our repeated hardware job did not include that additional patch-and-mirror series, leaving its global fidelity open.</p>
+<h2>What is RCS useful for?</h2>
+<figure class="wp-block-table"><table><thead><tr><th>Use</th><th>What RCS provides</th><th>Limit</th></tr></thead><tbody>
+<tr><td>Processor benchmarking</td><td>Test how many qubits, CZ layers and circuit cycles can run together with a measurable signal.</td><td>A benchmark score is not an application result.</td></tr>
+<tr><td>Hardware and compiler improvement</td><td>Compare physical layouts, calibration windows, transpilers and mitigation methods on frozen circuits.</td><td>Use the same circuits, shots and quality metric.</td></tr>
+<tr><td>Testing classical methods</td><td>A released circuit family lets tensor networks, MPS and other samplers compete on a concrete task.</td><td>Runtime comparisons need the same required output quality.</td></tr>
+<tr><td>Quantum-dynamics research</td><td>Random circuits provide a controlled probe of information spreading, entanglement and noise.</td><td>The Nighthawk circuit does not automatically model a material or chemical reaction.</td></tr>
+</tbody></table></figure>
+<h2>What is it not yet?</h2>
+<p>An RCS bitstring is usually not the answer to an optimization problem, a molecular energy, or proof that a quantum computer speeds up useful machine-learning tasks. Its direct application is <strong>measuring how well a quantum processor executes difficult, checkable circuits</strong>. Those measurements can guide better hardware and verification methods; a practical algorithm must then be tested on its own task.</p>
+<p>Further reading: <a href="https://arxiv.org/abs/2609.28657">Sedrakyan et al. on Nighthawk</a> and <a href="https://research.google/pubs/characterizing-quantum-supremacy-in-near-term-devices/">Boixo et al. on RCS and XEB</a>.</p>
+""",
+    },
 ]
 
 
@@ -169,7 +221,7 @@ def render(page: dict) -> str:
     nav_items = []
     if index > 0:
         nav_items.append(f'<a href="{path(siblings[index-1])}">{"Vorige" if page["lang"] == "nl" else "Previous"}</a>')
-    if index < 3:
+    if index < 4:
         nav_items.append(f'<a href="{path(siblings[index+1])}">{"Volgende" if page["lang"] == "nl" else "Next"}</a>')
     nav_items.append(f'<a href="{path(siblings[0])}">{"Overzicht" if page["lang"] == "nl" else "Overview"}</a>')
     navigation = '<nav class="rcs61-navigation" aria-label="Series navigation"><p>' + ' · '.join(nav_items) + '</p></nav>'

@@ -36,6 +36,12 @@ def main() -> None:
             "project_repo": "github.com/BramDo/rcs-nighthawk-replication" in html,
             "navigation": "rcs61-navigation" in html,
         }
+        if page["part"] == 0:
+            checks["part_four_link"] = BY_PAIR[(page["lang"], 4)]["path"] in html
+        if page["part"] == 4:
+            checks["rcs_theory"] = "Porter" in html and "Boixo" in html
+            checks["applications"] = ("Processorbenchmark" in html if page["lang"] == "nl"
+                                      else "Processor benchmarking" in html)
         rows.append({"key": page["key"], "url": BASE + page["path"], "checks": checks})
     status, homepage = fetch(BASE + "/?rcs61verify=" + cache_bust)
     home = {"http_200": status == 200,
