@@ -69,6 +69,7 @@ $menu_root = wp_update_nav_menu_item($menu_id, $existing ? $existing->ID : 0, [
     'menu-item-status' => 'publish',
     'menu-item-type' => 'custom',
     'menu-item-parent-id' => 0,
+    'menu-item-position' => $existing ? (int) $existing->menu_order : 0,
 ]);
 if (is_wp_error($menu_root)) {
     throw new RuntimeException('Could not create the RCS menu root: ' . $menu_root->get_error_message());
@@ -84,6 +85,7 @@ for ($part = 1; $part <= 4; $part++) {
         'menu-item-status' => 'publish',
         'menu-item-type' => 'custom',
         'menu-item-parent-id' => (int) $menu_root,
+        'menu-item-position' => $existing ? (int) $existing->menu_order : 0,
     ]);
     if (is_wp_error($id)) {
         throw new RuntimeException("Could not create menu item $key: " . $id->get_error_message());

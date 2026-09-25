@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import time
+from html.parser import HTMLParser
 from pathlib import Path
 from urllib.request import Request, urlopen
 
@@ -12,6 +13,26 @@ MANIFEST = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
 PAGES = MANIFEST["pages"]
 BY_PAIR = {(p["lang"], p["part"]): p for p in PAGES}
 BASE = MANIFEST["base"]
+
+
+class AnchorLabels(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.labels: list[str] = []
+        self._parts: list[str] | None = None
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "a":
+            self._parts = []
+
+    def handle_data(self, data: str) -> None:
+        if self._parts is not None:
+            self._parts.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "a" and self._parts is not None:
+            self.labels.append(" ".join("".join(self._parts).split()))
+            self._parts = None
 
 
 def fetch(url: str) -> tuple[int, str]:
@@ -44,9 +65,15 @@ def main() -> None:
                                       else "Processor benchmarking" in html)
         rows.append({"key": page["key"], "url": BASE + page["path"], "checks": checks})
     status, homepage = fetch(BASE + "/?rcs61verify=" + cache_bust)
+    anchors = AnchorLabels()
+    anchors.feed(homepage)
+    nighthawk_positions = [i for i, label in enumerate(anchors.labels) if label == "Nighthawk RCS 61q"]
+    work_positions = [i for i, label in enumerate(anchors.labels) if label == "Work"]
     home = {"http_200": status == 200,
             "menu_label": "Nighthawk RCS 61q" in homepage,
-            "english_hub_link": BY_PAIR[("en", 0)]["path"] in homepage}
+            "english_hub_link": BY_PAIR[("en", 0)]["path"] in homepage,
+            "nighthawk_before_work": bool(nighthawk_positions and work_positions
+                                          and nighthawk_positions[0] < work_positions[0])}
     report = {"series": MANIFEST["series"], "pages": rows, "homepage": home}
     (ROOT / "verification.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"pages": len(rows),
