@@ -1,0 +1,11 @@
+*.npz
+*.qpy
+*.pdf
+*.log
+.env
+.env.*
+**/__pycache__/
+rcs-nighthawk/
+quantum/full_60qs/
+publication/rcs61-series/verification.json
+publication/rcs61-series/published.json

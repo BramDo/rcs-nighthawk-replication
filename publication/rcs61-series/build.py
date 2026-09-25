@@ -1,0 +1,201 @@
+"""Build bilingual, source-grounded Edukaizen pages for the RCS 61q series."""
+
+from __future__ import annotations
+
+import json
+from html import escape
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+BASE = "https://edukaizen.nl"
+PAPER = "https://arxiv.org/abs/2609.28657"
+REPO = "https://github.com/BramDo/rcs-nighthawk"
+FOLLOWUP_REPO = "https://github.com/BramDo/rcs-nighthawk-replication"
+
+PAGES = [
+    {
+        "key": "nl-hub", "lang": "nl", "part": 0,
+        "title": "Nighthawk 61 qubits: de paper, onze IBM-run en de klassieke toets",
+        "slug": "nighthawk-61-qubit-random-circuit-sampling",
+        "parent_key": None,
+        "lead": "Een 61-qubit random-circuit proef op IBM Nighthawk r2, opnieuw uitgevoerd met een lokaal klassieke MPS-vergelijking. Deze reeks laat de meetwaarden zien en houdt tijd, samplekwaliteit en de claim van quantumvoordeel uit elkaar.",
+        "body": """
+<h2>Wat is er gebeurd?</h2>
+<p>In de <a href="https://arxiv.org/abs/2609.28657">preprint van Sedrakyan en collega’s</a> wordt een random circuit met 61 qubits, 36 cycli en 918 CZ-poorten op <code>ibm_phoenix</code> bemonsterd. De onderzoekers rapporteerden één miljoen bitstrings in 19 seconden QPU-tijd. Zij schatten de kwaliteit van het diepe circuit op ongeveer 0,0023 met afzonderlijke spiegel- en patchproeven.</p>
+<p>Wij draaiden hetzelfde vrijgegeven logische circuit op dezelfde backend en fysieke layout: opnieuw één miljoen bitstrings en opnieuw 19 seconden gerapporteerde QPU-tijd. Onze 61-qubit bitstrings zijn niet rechtstreeks met ideale amplitudes gescoord. De tijd is dus herhaald; de fideliteit uit de paper is niet onafhankelijk herhaald.</p>
+<h2>Lees de reeks</h2>
+<ol><li><a href="/nighthawk-61-qubit-random-circuit-sampling/1-paper-en-methode/">Deel 1 — De paper en haar methode</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling/2-onze-61-qubit-metingen/">Deel 2 — Onze 61-qubit metingen</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling/3-mps-en-quantumvoordeel/">Deel 3 — MPS en de grens van de vergelijking</a></li></ol>
+<h2>De kern in drie getallen</h2>
+<figure class="wp-block-table"><table><thead><tr><th>Route</th><th>Samples</th><th>Gerapporteerde tijd</th></tr></thead><tbody><tr><td>Paper: quantum</td><td>1.000.000</td><td>19 s QPU</td></tr><tr><td>Onze IBM-run: quantum</td><td>1.000.000</td><td>19 s QPU</td></tr><tr><td>Onze MPS, χ=128</td><td>1.000</td><td>1.249 s lokale rekentijd</td></tr></tbody></table></figure>
+<p>De laatste twee tijden tonen een grote voorsprong op <em>deze geteste MPS-implementatie</em>. Het zijn verschillende klokken en de MPS-uitkomsten komen op eenvoudige bitstatistieken nog niet overeen met de IBM-data. Daarom maken we geen nieuwe claim dat onze run de beste klassieke methode bij gelijke kwaliteit heeft verslagen.</p>
+""",
+    },
+    {
+        "key": "en-hub", "lang": "en", "part": 0,
+        "title": "Nighthawk 61 qubits: the paper, our IBM run and a classical test",
+        "slug": "nighthawk-61-qubit-random-circuit-sampling-en",
+        "parent_key": None,
+        "lead": "A 61-qubit random-circuit experiment on IBM Nighthawk r2, repeated alongside a local classical MPS comparison. This series shows the measured values while keeping runtime, sample quality and the quantum-advantage claim distinct.",
+        "body": """
+<h2>What happened?</h2>
+<p>In the <a href="https://arxiv.org/abs/2609.28657">preprint by Sedrakyan and colleagues</a>, a random circuit on 61 qubits with 36 cycles and 918 CZ gates was sampled on <code>ibm_phoenix</code>. The researchers reported one million bitstrings in 19 seconds of QPU time. They estimated deep-circuit fidelity near 0.0023 using separate mirror and patch experiments.</p>
+<p>We ran the same released logical circuit on the same backend and physical layout: another million bitstrings and another 19 seconds of reported QPU time. Our full-width bitstrings were not directly scored against ideal amplitudes. We repeated the timing, not the paper’s fidelity estimate.</p>
+<h2>Read the series</h2>
+<ol><li><a href="/nighthawk-61-qubit-random-circuit-sampling-en/1-paper-and-method/">Part 1 — The paper and its method</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling-en/2-our-61-qubit-measurements/">Part 2 — Our 61-qubit measurements</a></li><li><a href="/nighthawk-61-qubit-random-circuit-sampling-en/3-mps-and-quantum-advantage/">Part 3 — MPS and the limits of the comparison</a></li></ol>
+<h2>Three numbers to start with</h2>
+<figure class="wp-block-table"><table><thead><tr><th>Route</th><th>Samples</th><th>Reported time</th></tr></thead><tbody><tr><td>Paper: quantum</td><td>1,000,000</td><td>19 s QPU</td></tr><tr><td>Our IBM run: quantum</td><td>1,000,000</td><td>19 s QPU</td></tr><tr><td>Our MPS, χ=128</td><td>1,000</td><td>1,249 s local runtime</td></tr></tbody></table></figure>
+<p>The latter two timings show a large lead over <em>this tested MPS implementation</em>. They use different clocks, and the MPS output still differs from IBM on simple bit statistics. We therefore make no new claim that our run beats the best classical method at matched output quality.</p>
+""",
+    },
+    {
+        "key": "nl-1", "lang": "nl", "part": 1,
+        "title": "Deel 1: Wat de Nighthawk-paper daadwerkelijk meet",
+        "slug": "1-paper-en-methode", "parent_key": "nl-hub",
+        "lead": "De schaal is groot: 61 qubits en 918 verstrengelende poorten. Maar hoe weet je of de bitstrings nog iets van het bedoelde quantumcircuit bevatten?",
+        "body": """
+<h2>De taak</h2>
+<p>Random-circuit sampling vraagt een processor een vast maar ingewikkeld circuit uit te voeren en zijn 61 qubits aan het einde te meten. Elke shot levert één bitstring. Bij 36 cycli bevat het vrijgegeven circuit 918 CZ-poorten. De paper gebruikte een subset van de 120-qubit Nighthawk r2-chip <code>ibm_phoenix</code> en verzamelde één miljoen bitstrings in 19 seconden QPU-tijd.</p>
+<h2>Waarom één miljoen bitstrings niet genoeg bewijs is</h2>
+<p>Ook een slechte of volledig willekeurige sampler kan een miljoen verschillende 61-bit strings opleveren: de ruimte bevat 2<sup>61</sup> mogelijkheden. Een histogram van het aantal nullen en enen zegt evenmin welke specifieke uitkomsten het ideale circuit bevoordeelt. Voor rechtstreekse cross-entropy benchmarking (XEB) zouden de ideale kansen voor gemeten strings nodig zijn. Die volledige 61-qubit kansen zijn op deze diepte te kostbaar om voor de complete dataset te berekenen.</p>
+<h2>De kwaliteitsroute van de paper</h2>
+<p>De auteurs gebruikten daarom twee andere routes: spiegelcircuits, die een omkeerbare bewerking testen, en circuits die in drie of vier kleinere patches worden gesplitst zodat hun ideale kansen berekenbaar blijven. Bij 36 cycli geven de drie schattingen ongeveer 0,0022, 0,0018 en 0,0020; de fit is ongeveer 0,0023. Dit is een <em>proxy</em> voor de kwaliteit van het volle circuit, geen directe XEB-score van de miljoen volle bitstrings.</p>
+<h2>Waar komen de klassieke jaren vandaan?</h2>
+<p>De paper schat de kosten van een specifieke klassieke route: veel afzonderlijke tensorcontracties voor een rejection sampler die de beoogde fideliteit haalt. De tabel geeft bij 36 cycli circa 10<sup>21,82</sup> complexe bewerkingen per amplitude en circa 1,2 × 10<sup>27</sup> machine-FLOPs voor één miljoen samples, vertaald naar ongeveer 110 Frontier-jaren onder de vermelde aannames. Dat is geen ondergrens voor <em>elke</em> klassieke methode. De auteurs noemen hergebruik van amplitudes, benaderende contractie en MPS uitdrukkelijk als open alternatieven.</p>
+<p>Bronnen: <a href="https://arxiv.org/abs/2609.28657">de preprint</a> en de <a href="https://github.com/BramDo/rcs-nighthawk">vrijgegeven code en meetdata</a>.</p>
+""",
+    },
+    {
+        "key": "en-1", "lang": "en", "part": 1,
+        "title": "Part 1: What the Nighthawk paper actually measures",
+        "slug": "1-paper-and-method", "parent_key": "en-hub",
+        "lead": "The scale is substantial: 61 qubits and 918 entangling gates. How do we know whether the measured strings still carry the signal of the intended circuit?",
+        "body": """
+<h2>The task</h2>
+<p>Random-circuit sampling asks a processor to execute a fixed, complicated circuit and measure its 61 qubits at the end. Each shot produces one bitstring. At 36 cycles, the released circuit contains 918 CZ gates. The paper used a subset of the 120-qubit Nighthawk r2 processor <code>ibm_phoenix</code> and collected a million bitstrings in 19 seconds of QPU time.</p>
+<h2>Why a million bitstrings are not enough evidence</h2>
+<p>Even a poor or uniform sampler can produce a million distinct 61-bit strings: the space has 2<sup>61</sup> possibilities. A histogram of zeros and ones also cannot show which particular outcomes the ideal circuit favors. Direct cross-entropy benchmarking (XEB) would require ideal probabilities for measured strings. At this depth, calculating those full 61-qubit probabilities for the complete dataset is too costly.</p>
+<h2>The paper’s quality estimate</h2>
+<p>The authors instead used two routes: mirror circuits, which test a reversible operation, and circuits divided into three or four smaller patches whose ideal probabilities remain calculable. At 36 cycles, the three estimates are about 0.0022, 0.0018 and 0.0020; the fitted value is about 0.0023. This is a <em>proxy</em> for full-circuit quality, not direct XEB of the million full-width bitstrings.</p>
+<h2>Where do the classical years come from?</h2>
+<p>The paper estimates the cost of a specific classical route: many independent tensor contractions for a rejection sampler at the target fidelity. At 36 cycles, its table gives about 10<sup>21.82</sup> complex operations per amplitude and roughly 1.2 × 10<sup>27</sup> machine FLOPs for a million samples, translated into about 110 Frontier years under the stated assumptions. This is not a lower bound on <em>all</em> classical methods. The authors explicitly leave amplitude reuse, approximate contraction and MPS as open alternatives.</p>
+<p>Sources: <a href="https://arxiv.org/abs/2609.28657">the preprint</a> and the <a href="https://github.com/BramDo/rcs-nighthawk">released code and measurements</a>.</p>
+""",
+    },
+    {
+        "key": "nl-2", "lang": "nl", "part": 2,
+        "title": "Deel 2: Onze miljoen 61-qubit metingen op IBM",
+        "slug": "2-onze-61-qubit-metingen", "parent_key": "nl-hub",
+        "lead": "We voerden het vrijgegeven circuit opnieuw uit op ibm_phoenix, met een harde bovengrens van 60 seconden QPU-uitvoering. De job eindigde na 19 QPU-seconden.",
+        "body": """
+<h2>De nieuwe hardwarejob</h2>
+<p>Op 25 september 2026 stuurden we het vrijgegeven 61-qubit circuit met 36 cycli naar <code>ibm_phoenix</code>. Het gebruikte dezelfde logische poorten en de gepubliceerde fysieke layout, met 918 CZ-poorten na compilatie. Eén IBM SamplerV2-job bevatte tien blokken van 100.000 shots. Meet-twirling stond aan; de ingestelde <code>max_execution_time</code> was 60 seconden. Job <code>dar90plvr3kc73eij3vg</code> eindigde met één miljoen uitkomsten en 19 seconden QPU-verbruik. Het circuituitvoeringsveld meldde 15,127 seconden; van indienen tot afronden verstreken ruim zeven minuten. Deze drie klokken mogen niet worden verwisseld.</p>
+<h2>Wat staat er in de uitkomsten?</h2>
+<p>Elke uitkomst is één reeks van 61 nullen en enen. Alle miljoen gemeten reeksen waren verschillend. Gemiddeld bevatten ze 30,440323 enen. De gepubliceerde miljoen reeksen bevatten gemiddeld 30,423606 enen. Het verschil tussen de twee histogrammen van het totale aantal enen is 0,003272 in totale-variatieafstand. Over de 61 afzonderlijke bitposities is het gemiddelde kwadratische verschil in de kans op <code>1</code> ongeveer 0,002092.</p>
+<p>Dat zijn concrete overeenkomsten op eenvoudige statistieken. Ze vertellen niet of precies de uitkomsten met hoge ideale kans vaker voorkomen. Twee totaal verschillende 61-bit verdelingen kunnen hetzelfde aantal nullen en enen per shot hebben.</p>
+<h2>Wat we wel en niet herhaalden</h2>
+<p>De schaal, het circuit, het aantal shots en de 19 seconden QPU-tijd zijn herhaald. We deden voor deze nieuwe run geen volledige spiegel- en patchserie. Daarom gebruiken we de circa 0,0023 van de paper niet als gemeten fideliteit van onze eigen miljoen bitstrings. Een aparte 21-qubit patchproef gaf een IBM XEB-schatting van 0,313 en met Fire Opal een puntwaarde van 0,385; die kleine patch meet niet de kwaliteit van het volle circuit.</p>
+<p>De <a href="https://github.com/BramDo/rcs-nighthawk">paper-repo</a> bevat het oorspronkelijke circuit en de gepubliceerde ruwe meetdata. Onze nieuwe job-ID en cijfers zijn hierboven vastgelegd; de ruwe nieuwe uitkomsten zijn in ons lokale qlab-project bewaard.</p>
+""",
+    },
+    {
+        "key": "en-2", "lang": "en", "part": 2,
+        "title": "Part 2: Our million 61-qubit measurements on IBM",
+        "slug": "2-our-61-qubit-measurements", "parent_key": "en-hub",
+        "lead": "We executed the released circuit again on ibm_phoenix with a hard 60-second QPU execution cap. The job completed with 19 QPU seconds.",
+        "body": """
+<h2>The new hardware job</h2>
+<p>On 25 September 2026 we sent the released 61-qubit, 36-cycle circuit to <code>ibm_phoenix</code>. It used the same logical gates and published physical layout, with 918 CZ gates after compilation. One IBM SamplerV2 job contained ten blocks of 100,000 shots. Measurement twirling was enabled; <code>max_execution_time</code> was set to 60 seconds. Job <code>dar90plvr3kc73eij3vg</code> finished with one million outcomes and 19 seconds of QPU usage. The circuit-execution field reported 15.127 seconds; submission-to-completion took more than seven minutes. These are different clocks.</p>
+<h2>What do the outcomes contain?</h2>
+<p>Each outcome is one string of 61 zeros and ones. All million observed strings were distinct. They contained an average of 30.440323 ones. The paper’s published million strings contained 30.423606 ones on average. The total-variation distance between the two histograms of the total number of ones was 0.003272. Across the 61 individual bit positions, the root-mean-square difference in <code>P(bit=1)</code> was about 0.002092.</p>
+<p>Those are concrete agreements in simple statistics. They do not tell us whether outcomes with high ideal probabilities occur more often. Two very different 61-bit distributions can share the same number-of-ones histogram.</p>
+<h2>What we did and did not repeat</h2>
+<p>We repeated the scale, circuit, shot count and 19-second QPU timing. We did not run a full new mirror-and-patch series. We therefore do not assign the paper’s approximate 0.0023 fidelity to our new million bitstrings. A separate 21-qubit patch pilot gave IBM XEB about 0.313 and a Fire Opal point estimate about 0.385; that smaller patch does not measure full-circuit quality.</p>
+<p>The <a href="https://github.com/BramDo/rcs-nighthawk">paper repository</a> contains the original circuit and published raw measurements. Our new job ID and figures are recorded above; the new raw outcomes remain in our local qlab project.</p>
+""",
+    },
+    {
+        "key": "nl-3", "lang": "nl", "part": 3,
+        "title": "Deel 3: MPS, χ en wat quantumvoordeel hier betekent",
+        "slug": "3-mps-en-quantumvoordeel", "parent_key": "nl-hub",
+        "lead": "De quantumhardware was veel sneller dan onze afgekapt klassieke simulator. Maar hoe verandert de kwaliteit wanneer de MPS-afkapdimensie χ stijgt?",
+        "body": """
+<h2>De gemeten klassieke tijden</h2>
+<p>We gebruikten Qiskit Aer met een matrix-product-state simulator (MPS) op hetzelfde logische 61-qubit circuit. Iedere klassieke run leverde 1.000 samples. De maximale bindingsdimensie χ begrenst hoeveel verstrengeling de benadering bewaart.</p>
+<figure class="wp-block-table"><table><thead><tr><th>χ</th><th>Lokale tijd voor 1.000 shots</th><th>RMS-verschil per bit t.o.v. IBM</th></tr></thead><tbody><tr><td>8</td><td>1,45 s</td><td>0,195</td></tr><tr><td>16</td><td>4,92 s</td><td>0,140</td></tr><tr><td>32</td><td>34,31 s</td><td>0,119</td></tr><tr><td>64</td><td>173,81 s</td><td>0,109</td></tr><tr><td>128</td><td>1.248,95 s</td><td>0,090</td></tr></tbody></table></figure>
+<p>Bij 1.000 samples ligt de 95%-grens van dit RMS-verschil, als de verdeling werkelijk gelijk is aan de gemeten IBM-verdeling, rond 0,018 door eindige-shotruis. χ=128 zit daar nog ongeveer vijfmaal boven. Zijn bitstrings bevatten gemiddeld 31,371 enen tegenover 30,440 bij IBM. De verdeling van het totale aantal enen beweegt niet netjes naar één limiet; die ene maat is dan ook onvoldoende om de volledige output te testen.</p>
+<h2>Wat zegt de tijdsverhouding?</h2>
+<p>De quantumjob leverde één miljoen samples in 19 seconden QPU-tijd. De lokale MPS-run met χ=128 had 1.249 seconden nodig voor duizend samples. Dat is een grote gemeten tijdsvoorsprong tegenover <em>deze specifieke klassieke implementatie</em>, zelfs voordat we het verschil in sampleaantal meenemen. De klokken verschillen: QPU-verbruik tegenover lokale programma-uitvoering. Bovendien is χ=128 nog geen kwaliteitsvergelijkbare klassieke output.</p>
+<h2>Extrapolatie en oordeel</h2>
+<p>Een fit op de gemeten looptijden χ=32–128 geeft ongeveer tijd ∝ χ<sup>2,59</sup>: circa twee uur bij χ=256 en twaalf uur bij χ=512 voor 1.000 samples, als dezelfde schaalwet aanhoudt. De fout in de nul/eenverdeling halveert echter niet consequent bij elke verdubbeling. We kunnen dus geen betrouwbare χ aanwijzen waarop MPS dezelfde fideliteit als het ideale circuit bereikt.</p>
+<p>Ons eigen resultaat ondersteunt een scherpe maar begrensde uitspraak: Nighthawk bemonsterde dit circuit veel sneller dan onze geteste afgekapt-MPS-runs, en de klassieke marges zijn nog niet geconvergeerd. De bredere claim van de paper berust op haar afzonderlijke fideliteitsproeven en gespecificeerde klassieke tensorcontractiemodel. Een nieuwe kwaliteitsvergelijkbare MPS- of tensorbenchmark blijft een nuttige vervolgtest.</p>
+<p>Bronnen: <a href="https://arxiv.org/abs/2609.28657">de paper</a>, <a href="https://github.com/BramDo/rcs-nighthawk">code en oorspronkelijke data</a>.</p>
+""",
+    },
+    {
+        "key": "en-3", "lang": "en", "part": 3,
+        "title": "Part 3: MPS, χ and what quantum advantage means here",
+        "slug": "3-mps-and-quantum-advantage", "parent_key": "en-hub",
+        "lead": "The quantum hardware was much faster than our capped classical simulator. How does sample quality change as the MPS bond dimension χ grows?",
+        "body": """
+<h2>Measured classical runtimes</h2>
+<p>We used Qiskit Aer’s matrix-product-state (MPS) simulator on the same logical 61-qubit circuit. Each classical run produced 1,000 samples. Maximum bond dimension χ limits how much entanglement the approximation retains.</p>
+<figure class="wp-block-table"><table><thead><tr><th>χ</th><th>Local time for 1,000 shots</th><th>Per-bit RMS difference from IBM</th></tr></thead><tbody><tr><td>8</td><td>1.45 s</td><td>0.195</td></tr><tr><td>16</td><td>4.92 s</td><td>0.140</td></tr><tr><td>32</td><td>34.31 s</td><td>0.119</td></tr><tr><td>64</td><td>173.81 s</td><td>0.109</td></tr><tr><td>128</td><td>1,248.95 s</td><td>0.090</td></tr></tbody></table></figure>
+<p>With 1,000 samples, the 95% noise-only threshold for this RMS difference is about 0.018 if the distribution truly matches the measured IBM distribution. χ=128 is still about five times higher. Its strings average 31.371 ones versus IBM’s 30.440. The distribution of the total number of ones does not move smoothly toward a single limit; that one summary cannot test the full output.</p>
+<h2>What does the runtime ratio say?</h2>
+<p>The quantum job yielded a million samples in 19 seconds of QPU time. The local χ=128 MPS run took 1,249 seconds for a thousand samples. This is a large measured runtime lead over <em>this particular classical implementation</em>, even before accounting for shot count. The clocks differ: QPU usage versus local program runtime. Moreover χ=128 has not produced a quality-matched classical output.</p>
+<h2>Extrapolation and conclusion</h2>
+<p>A fit to measured χ=32–128 runtimes gives approximately time ∝ χ<sup>2.59</sup>: around two hours at χ=256 and twelve hours at χ=512 for 1,000 samples if the same scaling persists. Yet the error in the zero/one distribution does not consistently halve with each doubling. We cannot identify a reliable χ at which MPS matches the ideal-circuit fidelity.</p>
+<p>Our result supports a sharp but limited statement: Nighthawk sampled this circuit far faster than our tested capped-MPS runs, whose simple marginals have not converged. The paper’s broader claim rests on its separate fidelity experiments and specified classical tensor-contraction model. A new quality-matched MPS or tensor benchmark remains a useful next test.</p>
+<p>Sources: <a href="https://arxiv.org/abs/2609.28657">the paper</a>, <a href="https://github.com/BramDo/rcs-nighthawk">code and original data</a>.</p>
+""",
+    },
+]
+
+
+def path(page: dict) -> str:
+    slug = page["slug"]
+    if page["parent_key"]:
+        parent = next(item for item in PAGES if item["key"] == page["parent_key"])
+        return f"/{parent['slug']}/{slug}/"
+    return f"/{slug}/"
+
+
+def render(page: dict) -> str:
+    counterpart = next(item for item in PAGES if item["lang"] != page["lang"] and item["part"] == page["part"])
+    siblings = [item for item in PAGES if item["lang"] == page["lang"]]
+    index = page["part"]
+    label = "English" if page["lang"] == "nl" else "Nederlands"
+    language = f'<p class="rcs61-language"><a href="{path(counterpart)}" hreflang="{counterpart["lang"]}">{label}</a></p>'
+    nav_items = []
+    if index > 0:
+        nav_items.append(f'<a href="{path(siblings[index-1])}">{"Vorige" if page["lang"] == "nl" else "Previous"}</a>')
+    if index < 3:
+        nav_items.append(f'<a href="{path(siblings[index+1])}">{"Volgende" if page["lang"] == "nl" else "Next"}</a>')
+    nav_items.append(f'<a href="{path(siblings[0])}">{"Overzicht" if page["lang"] == "nl" else "Overview"}</a>')
+    navigation = '<nav class="rcs61-navigation" aria-label="Series navigation"><p>' + ' · '.join(nav_items) + '</p></nav>'
+    return '\n'.join([
+        '<!-- rcs61-series-20260925 -->',
+        '<div class="rcs61-series">',
+        language,
+        f'<p class="rcs61-lead"><strong>{escape(page["lead"])}</strong></p>',
+        page["body"].strip(),
+        f'<p class="rcs61-paper-source"><a href="{PAPER}">{"Oorspronkelijke preprint" if page["lang"] == "nl" else "Original preprint"}</a></p>',
+        f'<p><a href="{FOLLOWUP_REPO}">{"Projectoverzicht en artikelbron" if page["lang"] == "nl" else "Project overview and article source"}</a></p>',
+        navigation,
+        '<p><small>Edukaizen · 25 september 2026 / 25 September 2026</small></p>',
+        '</div>',
+    ])
+
+
+def main() -> None:
+    manifest = {"series": "rcs61-20260925", "base": BASE, "pages": []}
+    for page in PAGES:
+        manifest["pages"].append({k: page[k] for k in ("key", "lang", "part", "title", "slug", "parent_key")}
+                                 | {"path": path(page), "content": render(page)})
+    output = HERE / "manifest.json"
+    output.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"Wrote {output}: {len(manifest['pages'])} pages")
+
+
+if __name__ == "__main__":
+    main()
